@@ -1,0 +1,67 @@
+local ds = game:GetService("DataStoreService")
+local datastore = ds:GetDataStore("Towers")
+
+game.Players.PlayerAdded:Connect(function(player)
+	local ls = Instance.new("Folder", player)
+	ls.Name = "leaderstats"
+	local towers = Instance.new("IntValue", ls)
+	towers.Name = "Towers"
+	local completionsfolder = game:GetService("ServerStorage"):WaitForChild("Completions")
+	local pfolder = Instance.new("Folder", completionsfolder)
+	local ring1 = Instance.new("Folder", pfolder)
+	local toaj = Instance.new("Folder", ring1)
+	local toss = Instance.new("Folder", ring1)
+	local completedtoaj = Instance.new("BoolValue", toaj)
+	local completedtoss = Instance.new("BoolValue", toss)
+	local completionstoaj = Instance.new("IntValue", toaj)
+	local completionstoss = Instance.new("IntValue", toss)
+	pfolder.Name = player.Name
+	ring1.Name = "Ring1"
+	toaj.Name = "ToAJ"
+	toss.Name = "ToSS"
+	completedtoaj.Name = "Completed"
+	completedtoss.Name = "Completed"
+	completionstoaj.Name = "Completions"
+	completionstoss.Name = "Completions"
+	
+	local id = "Player_"..player.UserId
+	local data
+	local success, errorMessage = pcall(function()
+		 data = datastore:GetAsync(id)
+	end)
+	
+	if success then
+		completedtoaj.Value = data.Ring1.ToAJ.Completed
+		completionstoaj.Value = data.Ring1.ToAJ.Completions
+		completedtoss.Value = data.Ring1.ToSS.Completed
+		completionstoss.Value = data.Ring1.ToSS.Completions
+	end
+	for i,v in pairs(pfolder:GetDescendants()) do
+		if v.Name == "Completed" and v.Value == true then
+			towers.Value += 1
+		end
+	end
+end)
+
+game.Players.PlayerRemoving:Connect(function(player)
+	local id = "Player_"..player.UserId
+	local completionsfolder = game:GetService("ServerStorage"):WaitForChild("Completions")
+	local pfolder = completionsfolder:FindFirstChild(player.Name)
+	local ring1 = pfolder:WaitForChild("Ring1")
+	local data = {
+		Ring1 = {
+			ToAJ = {Completed = ring1.ToAJ.Completed.Value, Completions = ring1.ToAJ.Completions.Value},
+			ToSS = {Completed = ring1.ToSS.Completed.Value, Completions = ring1.ToSS.Completions.Value}
+		}
+	}
+	
+	local success, errorMessage = pcall(function()
+		datastore:SetAsync(id,data)
+	end)
+	
+	if success then
+		print("Data saved for "..player.Name)
+	end
+	
+	pfolder:Destroy()
+end)
