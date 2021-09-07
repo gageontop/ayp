@@ -1,3 +1,4 @@
+	print("HELLO")
 	local ls = Instance.new("Folder", player)
 	ls.Name = "leaderstats"
 	local towers = Instance.new("IntValue", ls)
